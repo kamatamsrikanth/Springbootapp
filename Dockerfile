@@ -1,10 +1,12 @@
-FROM eclipse-temurin:17-jdk-jammy
-
+# Stage 1 – Build
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /src
+COPY . .
+RUN mvn clean package -DskipTests
 
-# copy jar from target folder
-COPY target/*.jar SampleApp.jar
-
+# Stage 2 – Run
+FROM eclipse-temurin:17-jdk-jammy
+WORKDIR /arc
+COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
-
-ENTRYPOINT ["java","-jar","SampleApp.jar"]
+ENTRYPOINT ["java","-jar","app.jar"]
